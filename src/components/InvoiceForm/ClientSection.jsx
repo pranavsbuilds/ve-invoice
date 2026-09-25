@@ -67,14 +67,10 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
 
   const handleDeleteClient = (id, e) => {
     if (e) e.stopPropagation();
-    const clientToDelete = clients.find((c) => c.id === id);
-    const clientName = clientToDelete ? clientToDelete.name : 'this client';
-    if (window.confirm(`Delete "${clientName}" from saved client presets?`)) {
-      const updated = deleteClientPreset(id);
-      setClients(updated);
-      if (selectedClientId === id) {
-        setSelectedClientId('');
-      }
+    const updated = deleteClientPreset(id);
+    setClients(updated);
+    if (selectedClientId === id) {
+      setSelectedClientId('');
     }
   };
 

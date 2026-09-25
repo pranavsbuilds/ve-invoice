@@ -7,3 +7,4 @@
 4. **Border Enclosure for PDF/Image**: The invoice sheet must always be bounded by a continuous, unbroken outer black perimeter border (`border-2 border-black` / `box-border`) enclosing all 4 sides with zero clipping at the bottom or margins in both PDF and image captures.
 5. **Milestone Execution Discipline**: Do not chain milestones without explicit user permission. Once approval is granted, verify previous milestone completion through a build/run test, mark as achieved, and proceed methodically.
 6. **Mobile Preview Auto-Fit & Clearance**: On mobile screens, the invoice pad preview must dynamically auto-scale to fit within the viewport width so no table columns or borders are clipped, with dedicated quick toggle controls (Fit Screen vs 100% Size) and bottom clearance padding (`pb-28`) to prevent fixed floating action bars from obscuring the invoice footer or signature.
+7. do not push to remote repo unless told , commit means commit to local repo .
