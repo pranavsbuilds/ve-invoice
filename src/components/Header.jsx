@@ -89,7 +89,7 @@ export default function Header({
             type="button"
             onClick={onLoadSample}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-medium border border-slate-700 transition"
-            title="Load the real Marine Electricals invoice from sample pad photo"
+            title="Load sample invoice with standard line items"
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Sample Invoice</span>

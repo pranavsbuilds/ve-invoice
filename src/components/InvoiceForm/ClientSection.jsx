@@ -174,7 +174,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                 rows="3"
                 value={invoice.billTo || ''}
                 onChange={(e) => onChange('billTo', e.target.value)}
-                placeholder="e.g. MARINE ELECTRICALS&#10;Industrial Estate Verna&#10;403722 GOA"
+                placeholder="e.g. APEX ENGINEERING WORKS&#10;Plot No. 45, Phase II, Industrial Area&#10;Goa - 403722"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-sans"
               />
             </div>
@@ -217,7 +217,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                 type="text"
                 value={invoice.kindAttention || ''}
                 onChange={(e) => onChange('kindAttention', e.target.value)}
-                placeholder="e.g. M/s. Chaitali Gaude / GSTIN 30AAFCM3153Q1ZQ"
+                placeholder="e.g. Kind Attention: Accounts Department / GSTIN: 30AAAAA0000A1Z5"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
@@ -258,7 +258,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                   type="text"
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
-                  placeholder="e.g. Marine Electricals (Verna)"
+                  placeholder="e.g. Apex Engineering Works"
                   className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none"
                   autoFocus
                 />
@@ -283,7 +283,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                   rows="4"
                   value={newClientBillTo}
                   onChange={(e) => setNewClientBillTo(e.target.value)}
-                  placeholder="e.g. MARINE ELECTRICALS&#10;Industrial Estate Verna&#10;403722 GOA"
+                  placeholder="e.g. APEX ENGINEERING WORKS&#10;Plot No. 45, Phase II, Industrial Area&#10;Goa - 403722"
                   className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none font-sans"
                 />
               </div>

@@ -2,9 +2,9 @@ const STORAGE_KEY_CLIENTS = 'vedant_saved_clients';
 
 export const DEFAULT_CLIENT_PRESETS = [
   {
-    id: 'preset-marine-electricals',
-    name: 'Marine Electricals (Verna)',
-    billTo: 'MARINE ELECTRICALS\nIndustrial Estate Verna\n403722 GOA',
+    id: 'preset-apex-engineering',
+    name: 'Apex Engineering Works',
+    billTo: 'APEX ENGINEERING WORKS\nPlot No. 45, Phase II, Industrial Area\nGoa - 403722',
     isDefault: true,
   },
 ];

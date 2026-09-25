@@ -42,7 +42,12 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [toast, setToast] = useState('');
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [fitMode, setFitMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'fit' : 'manual'));
+  const [containerWidth, setContainerWidth] = useState(800);
+  const [sheetHeight, setSheetHeight] = useState(1123);
   const [monochromeLogo, setMonochromeLogo] = useState(false);
+  const previewContainerRef = useRef(null);
+  const BASE_PAD_WIDTH = 794; // approx 210mm at 96 DPI
   const [collapsedSections, setCollapsedSections] = useState({
     company: true, // company profile closed by default to save vertical height
     meta: false,
@@ -76,6 +81,43 @@ export default function App() {
     saveCurrentInvoice(invoice);
   }, [invoice]);
 
+  // Responsive auto-fit scaling for mobile viewports
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (previewContainerRef.current) {
+        setContainerWidth(previewContainerRef.current.clientWidth);
+      } else if (typeof window !== 'undefined') {
+        setContainerWidth(window.innerWidth - 24);
+      }
+      const el = document.getElementById('invoice-pad-preview');
+      if (el) {
+        setSheetHeight(el.offsetHeight || 1123);
+      }
+    };
+
+    updateDimensions();
+    const timer = setTimeout(updateDimensions, 60);
+    window.addEventListener('resize', updateDimensions);
+
+    let ro = null;
+    if (typeof ResizeObserver !== 'undefined' && previewContainerRef.current) {
+      ro = new ResizeObserver(() => {
+        updateDimensions();
+      });
+      ro.observe(previewContainerRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateDimensions);
+      if (ro) ro.disconnect();
+    };
+  }, [activeMobileTab, invoice]);
+
+  const availableWidth = Math.max(280, containerWidth - 16);
+  const autoFitScale = Math.min(1, Math.max(0.3, availableWidth / BASE_PAD_WIDTH));
+  const effectiveScale = fitMode === 'fit' ? autoFitScale : zoomLevel;
+
   const showToast = (message) => {
     setToast(message);
     setTimeout(() => setToast(''), 3000);
@@ -99,7 +141,7 @@ export default function App() {
 
   const handleLoadSample = () => {
     setInvoice({ ...SAMPLE_INVOICE, id: `inv-${Date.now()}` });
-    showToast('Loaded sample Marine Electricals invoice');
+    showToast('Loaded sample invoice');
   };
 
   const handleSaveInvoice = () => {
@@ -235,12 +277,12 @@ export default function App() {
 
           {/* RIGHT PANE: LIVE INVOICE PREVIEW (Visible on laptop, or when mobileTab === 'preview') */}
           <section
-            className={`lg:col-span-6 xl:col-span-7 flex flex-col items-center ${
-              activeMobileTab === 'preview' ? 'block' : 'hidden lg:flex'
+            className={`lg:col-span-6 xl:col-span-7 flex flex-col items-center w-full ${
+              activeMobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
             }`}
           >
             {/* Live Preview Controls Header */}
-            <div className="w-full max-w-[210mm] flex items-center justify-between bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 mb-3 no-print">
+            <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-2 bg-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-sm border border-slate-200 mb-3 no-print">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-blue-600" /> Live Pad Replica
@@ -251,7 +293,38 @@ export default function App() {
               </div>
 
               {/* View options */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
+                {/* Mobile Fit vs 100% Quick Toggle */}
+                <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setFitMode('fit')}
+                    className={`px-2 py-1 rounded transition text-[11px] ${
+                      fitMode === 'fit'
+                        ? 'bg-blue-600 text-white shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Fit invoice to screen width"
+                  >
+                    Fit Screen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFitMode('manual');
+                      setZoomLevel(1);
+                    }}
+                    className={`px-2 py-1 rounded transition text-[11px] ${
+                      fitMode === 'manual' && zoomLevel === 1
+                        ? 'bg-blue-600 text-white shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="View 100% actual size"
+                  >
+                    100%
+                  </button>
+                </div>
+
                 {/* Monochrome logo toggle */}
                 <button
                   type="button"
@@ -266,32 +339,38 @@ export default function App() {
                   {monochromeLogo ? 'Pad B&W Logo' : 'Color Logo'}
                 </button>
 
-                {/* Zoom Controls (Desktop only) */}
-                <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-slate-700">
+                {/* Zoom Controls (Accessible on both mobile & desktop) */}
+                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-slate-700">
                   <button
                     type="button"
-                    onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.1))}
-                    className="p-1 hover:bg-white rounded transition"
+                    onClick={() => {
+                      setFitMode('manual');
+                      setZoomLevel((z) => Math.max(0.4, Number((z - 0.1).toFixed(2))));
+                    }}
+                    className="p-1 hover:bg-white rounded transition text-slate-600 hover:text-slate-900"
                     title="Zoom Out"
                   >
                     <ZoomOut className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-[11px] font-mono font-bold px-1.5 min-w-[42px] text-center">
-                    {Math.round(zoomLevel * 100)}%
+                  <span className="text-[11px] font-mono font-bold px-1 min-w-[38px] text-center">
+                    {Math.round(effectiveScale * 100)}%
                   </span>
                   <button
                     type="button"
-                    onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
-                    className="p-1 hover:bg-white rounded transition"
+                    onClick={() => {
+                      setFitMode('manual');
+                      setZoomLevel((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))));
+                    }}
+                    className="p-1 hover:bg-white rounded transition text-slate-600 hover:text-slate-900"
                     title="Zoom In"
                   >
                     <ZoomIn className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
-                    onClick={() => setZoomLevel(1)}
-                    className="p-1 hover:bg-white rounded transition"
-                    title="Reset Zoom"
+                    onClick={() => setFitMode('fit')}
+                    className="p-1 hover:bg-white rounded transition text-slate-600 hover:text-slate-900 hidden sm:inline-block"
+                    title="Reset to Fit Screen"
                   >
                     <Maximize2 className="w-3.5 h-3.5" />
                   </button>
@@ -299,21 +378,34 @@ export default function App() {
               </div>
             </div>
 
-            {/* Live Sheet Container */}
-            <div className="w-full overflow-x-auto flex justify-center py-2 px-1">
+            {/* Live Sheet Container with auto-fit and bottom clearance */}
+            <div
+              ref={previewContainerRef}
+              className="w-full overflow-x-auto flex justify-center py-2 px-1 pb-28 sm:pb-8"
+            >
               <div
-                className="transition-transform origin-top duration-150 shadow-2xl rounded-sm print-area-wrapper"
+                className="transition-all duration-150 shadow-2xl rounded-sm print-area-wrapper mx-auto"
                 style={{
-                  transform: `scale(${zoomLevel})`,
-                  transformOrigin: 'top center',
+                  width: `${Math.round(BASE_PAD_WIDTH * effectiveScale)}px`,
+                  height: `${Math.round(sheetHeight * effectiveScale)}px`,
+                  minWidth: `${Math.round(BASE_PAD_WIDTH * effectiveScale)}px`,
+                  overflow: 'hidden',
                 }}
               >
-                <InvoicePad
-                  invoice={invoice}
-                  options={{
-                    monochromeLogo,
+                <div
+                  style={{
+                    width: `${BASE_PAD_WIDTH}px`,
+                    transform: `scale(${effectiveScale})`,
+                    transformOrigin: 'top left',
                   }}
-                />
+                >
+                  <InvoicePad
+                    invoice={invoice}
+                    options={{
+                      monochromeLogo,
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -351,12 +443,7 @@ export default function App() {
       </main>
 
       {/* Website Footer */}
-      <Footer
-        onNewInvoice={handleNewInvoice}
-        onLoadSample={handleLoadSample}
-        onOpenHistory={() => setShowHistoryModal(true)}
-        onDownloadPdf={handleDownloadPDF}
-      />
+      <Footer />
 
       {/* Modals */}
       <ShareModal

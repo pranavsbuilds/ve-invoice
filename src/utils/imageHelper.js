@@ -6,9 +6,24 @@ export async function captureInvoiceCanvas(elementId = 'invoice-pad-preview') {
     throw new Error('Invoice element not found');
   }
 
-  // Preserve original inline styles
+  // Preserve original inline styles and normalize wrappers
+  const wrapper = element.closest('.print-area-wrapper');
+  const innerScaled = element.parentElement;
+
   const originalTransform = element.style.transform;
+  const originalWrapperStyle = wrapper ? wrapper.getAttribute('style') : null;
+  const originalInnerStyle = innerScaled ? innerScaled.getAttribute('style') : null;
+
   element.style.transform = 'none';
+  if (wrapper) {
+    wrapper.style.width = 'auto';
+    wrapper.style.height = 'auto';
+    wrapper.style.overflow = 'visible';
+  }
+  if (innerScaled && innerScaled !== wrapper) {
+    innerScaled.style.transform = 'none';
+    innerScaled.style.width = 'auto';
+  }
 
   try {
     const canvas = await html2canvas(element, {
@@ -23,6 +38,14 @@ export async function captureInvoiceCanvas(elementId = 'invoice-pad-preview') {
     return canvas;
   } finally {
     element.style.transform = originalTransform;
+    if (wrapper) {
+      if (originalWrapperStyle) wrapper.setAttribute('style', originalWrapperStyle);
+      else wrapper.removeAttribute('style');
+    }
+    if (innerScaled && innerScaled !== wrapper) {
+      if (originalInnerStyle) innerScaled.setAttribute('style', originalInnerStyle);
+      else innerScaled.removeAttribute('style');
+    }
   }
 }
 

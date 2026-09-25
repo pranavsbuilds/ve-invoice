@@ -7,9 +7,24 @@ export async function downloadInvoicePDF(elementId, invoiceNo = 'Invoice') {
     throw new Error('Invoice preview element not found');
   }
 
-  // Visual feedback or prepare element
+  // Temporarily reset any scaling on element and its preview containers
+  const wrapper = element.closest('.print-area-wrapper');
+  const innerScaled = element.parentElement;
+
   const originalTransform = element.style.transform;
+  const originalWrapperStyle = wrapper ? wrapper.getAttribute('style') : null;
+  const originalInnerStyle = innerScaled ? innerScaled.getAttribute('style') : null;
+
   element.style.transform = 'none';
+  if (wrapper) {
+    wrapper.style.width = 'auto';
+    wrapper.style.height = 'auto';
+    wrapper.style.overflow = 'visible';
+  }
+  if (innerScaled && innerScaled !== wrapper) {
+    innerScaled.style.transform = 'none';
+    innerScaled.style.width = 'auto';
+  }
 
   try {
     const canvas = await html2canvas(element, {
@@ -54,6 +69,14 @@ export async function downloadInvoicePDF(elementId, invoiceNo = 'Invoice') {
     return true;
   } finally {
     element.style.transform = originalTransform;
+    if (wrapper) {
+      if (originalWrapperStyle) wrapper.setAttribute('style', originalWrapperStyle);
+      else wrapper.removeAttribute('style');
+    }
+    if (innerScaled && innerScaled !== wrapper) {
+      if (originalInnerStyle) innerScaled.setAttribute('style', originalInnerStyle);
+      else innerScaled.removeAttribute('style');
+    }
   }
 }
 
