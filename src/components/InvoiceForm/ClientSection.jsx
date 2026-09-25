@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, MapPin, AtSign, Plus, Trash2, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
 import { loadSavedClients, saveClientPreset, deleteClientPreset } from '../../utils/clientStorage';
 
 export default function ClientSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newClientName, setNewClientName] = useState('');
   const [newClientBillTo, setNewClientBillTo] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const dropdownRef = useRef(null);
 
   const quickPlaces = ['Verna', 'Sancoal', 'Zuarinagar', 'Panaji', 'Margao', 'Mapusa', 'Goa'];
 
@@ -16,21 +19,19 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
     setClients(loadSavedClients());
   }, []);
 
-  const handleSelectClient = (e) => {
-    const id = e.target.value;
-    setSelectedClientId(id);
-    if (!id) return;
-
-    const chosen = clients.find((c) => c.id === id);
-    if (chosen && chosen.billTo) {
-      // Per user instruction: only Bill To is populated; rest are entered manually
-      onChange('billTo', chosen.billTo);
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
     }
-  };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleOpenAddModal = () => {
     setNewClientName('');
-    // Pre-populate with current Bill To if available for quick saving
     setNewClientBillTo(invoice.billTo || '');
     setErrorMsg('');
     setShowAddModal(true);
@@ -64,8 +65,11 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
     }
   };
 
-  const handleDeleteClient = (id) => {
-    if (window.confirm('Delete this client preset from saved list?')) {
+  const handleDeleteClient = (id, e) => {
+    if (e) e.stopPropagation();
+    const clientToDelete = clients.find((c) => c.id === id);
+    const clientName = clientToDelete ? clientToDelete.name : 'this client';
+    if (window.confirm(`Delete "${clientName}" from saved client presets?`)) {
       const updated = deleteClientPreset(id);
       setClients(updated);
       if (selectedClientId === id) {
@@ -78,6 +82,8 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
   const clientSummary = invoice.billTo
     ? invoice.billTo.split('\n')[0].substring(0, 30)
     : 'No client entered';
+
+  const selectedClient = clients.find((c) => c.id === selectedClientId);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -119,7 +125,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
       {/* Collapsible Content */}
       {!isCollapsed && (
         <div className="p-4 space-y-4">
-          {/* Client Presets Dropdown & Add Button Row */}
+          {/* Custom Client Presets Dropdown & Add Button Row */}
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-200/80 space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -136,30 +142,82 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedClientId}
-                onChange={handleSelectClient}
-                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-sans text-slate-700 font-medium"
+            {/* Custom Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white hover:bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition text-left flex items-center justify-between font-sans text-slate-700 font-medium shadow-sm"
               >
-                <option value="">-- Select a Saved Client (Fills Bill To) --</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                <span className={selectedClient ? 'text-slate-900 font-semibold truncate' : 'text-slate-500 truncate'}>
+                  {selectedClient ? selectedClient.name : '-- Select a Saved Client (Fills Bill To) --'}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-150 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-              {/* Delete custom client button */}
-              {selectedClientId && !clients.find((c) => c.id === selectedClientId)?.isDefault && (
-                <button
-                  type="button"
-                  onClick={() => handleDeleteClient(selectedClientId)}
-                  className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg transition"
-                  title="Delete this saved client"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              {isDropdownOpen && (
+                <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-64 overflow-y-auto py-1 animate-in fade-in zoom-in-95 duration-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClientId('');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs font-semibold hover:bg-slate-100 transition flex items-center justify-between ${!selectedClientId ? 'bg-blue-50 text-blue-600' : 'text-slate-500'}`}
+                  >
+                    <span>-- Select a Saved Client (Fills Bill To) --</span>
+                    {!selectedClientId && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  </button>
+
+                  <div className="h-px bg-slate-100 my-1" />
+
+                  {clients.length === 0 ? (
+                    <div className="px-3 py-3 text-xs text-slate-400 text-center italic">
+                      No saved client presets. Click "+ Add Client" to save one.
+                    </div>
+                  ) : (
+                    clients.map((c) => {
+                      const isSelected = c.id === selectedClientId;
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedClientId(c.id);
+                            if (c.billTo) {
+                              onChange('billTo', c.billTo);
+                            }
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`group px-3 py-2 hover:bg-blue-50/70 cursor-pointer flex items-center justify-between transition border-b border-slate-50 last:border-none ${
+                            isSelected ? 'bg-blue-50 text-blue-900' : 'text-slate-700'
+                          }`}
+                        >
+                          <div className="flex-1 min-w-0 pr-2">
+                            <div className="font-semibold text-xs truncate flex items-center gap-1.5">
+                              {c.name}
+                              {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 inline flex-shrink-0" />}
+                            </div>
+                            {c.billTo && (
+                              <div className="text-[11px] text-slate-400 truncate">
+                                {c.billTo.split('\n')[0]}
+                              </div>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteClient(c.id, e)}
+                            className="p-1.5 text-rose-600 hover:bg-rose-100/80 hover:text-rose-700 border border-rose-200 bg-rose-50/50 rounded-md transition shadow-xs flex-shrink-0"
+                            title={`Delete ${c.name} preset`}
+                            aria-label={`Delete ${c.name}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               )}
             </div>
           </div>
