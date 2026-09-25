@@ -34,7 +34,6 @@ export const createEmptyItem = (srNo = 1) => ({
   uom: 'NOS',
   rate: '',
   amount: '',
-  isManualAmount: false,
 });
 
 export const SAMPLE_INVOICE = {
@@ -63,7 +62,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '7500',
       amount: '150000',
-      isManualAmount: false,
     },
     {
       id: 'item-2',
@@ -73,7 +71,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '7500',
       amount: '75000',
-      isManualAmount: false,
     },
     {
       id: 'item-3',
@@ -83,7 +80,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '6500',
       amount: '32500',
-      isManualAmount: false,
     },
     {
       id: 'item-4',
@@ -93,7 +89,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '6500',
       amount: '39000',
-      isManualAmount: false,
     },
     {
       id: 'item-5',
@@ -103,7 +98,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '28000',
       amount: '56000',
-      isManualAmount: false,
     },
     {
       id: 'item-6',
@@ -113,7 +107,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '820',
       amount: '8200',
-      isManualAmount: false,
     },
     {
       id: 'item-7',
@@ -123,7 +116,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '25230',
       amount: '50460',
-      isManualAmount: false,
     },
     {
       id: 'item-8',
@@ -133,7 +125,6 @@ export const SAMPLE_INVOICE = {
       uom: 'NOS',
       rate: '23700',
       amount: '47400',
-      isManualAmount: false,
     },
   ],
   customAmountInWords: '',

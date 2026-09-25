@@ -7,13 +7,20 @@ export function calculateInvoiceTotals(invoice) {
   
   const processedItems = items.map((item, index) => {
     let amt = 0;
-    const qty = parseFloat(item.colsDbs);
-    const rate = parseFloat(item.rate);
+    const cleanQtyStr = (item.colsDbs || '').toString().replace(/,/g, '').trim();
+    const cleanRateStr = (item.rate || '').toString().replace(/,/g, '').trim();
+    const cleanAmtStr = (item.amount || '').toString().replace(/,/g, '').trim();
 
-    if (item.isManualAmount || isNaN(qty) || isNaN(rate)) {
-      amt = parseFloat(item.amount) || 0;
-    } else {
+    const qty = parseFloat(cleanQtyStr);
+    const rate = parseFloat(cleanRateStr);
+    const parsedAmt = parseFloat(cleanAmtStr);
+
+    if (cleanAmtStr !== '' && cleanAmtStr !== '-' && !isNaN(parsedAmt)) {
+      amt = Math.round(parsedAmt * 100) / 100;
+    } else if (!isNaN(qty) && !isNaN(rate)) {
       amt = Math.round(qty * rate * 100) / 100;
+    } else {
+      amt = 0;
     }
 
     taxableValue += amt;
@@ -21,7 +28,7 @@ export function calculateInvoiceTotals(invoice) {
     return {
       ...item,
       srNo: index + 1,
-      calculatedAmount: amt
+      calculatedAmount: amt,
     };
   });
 

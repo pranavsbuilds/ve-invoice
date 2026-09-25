@@ -148,7 +148,9 @@ export default function InvoicePad({ invoice, options = {} }) {
             ? (item.rate || '-')
             : formatIndianCurrency(rateVal);
 
-          const amtDisplay = formatIndianCurrency(item.calculatedAmount);
+          const amtDisplay = (item.amount || '').toString().trim() === '-'
+            ? '-'
+            : formatIndianCurrency(item.calculatedAmount);
 
           return (
             <div

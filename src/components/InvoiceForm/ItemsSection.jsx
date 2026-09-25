@@ -5,35 +5,53 @@ import { COMMON_UOM, createEmptyItem } from '../../types/invoice';
 export default function ItemsSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
   const items = invoice.items || [];
 
-  const handleItemChange = (index, field, value) => {
-    const updated = [...items];
-    const current = { ...updated[index], [field]: value };
-
-    // Auto calculate amount if not manual
-    if (field === 'colsDbs' || field === 'rate') {
-      const qty = parseFloat(field === 'colsDbs' ? value : current.colsDbs);
-      const rate = parseFloat(field === 'rate' ? value : current.rate);
-
-      if (!current.isManualAmount && !isNaN(qty) && !isNaN(rate)) {
-        current.amount = (Math.round(qty * rate * 100) / 100).toString();
-      }
+  // Filter helper: allows digits, optional decimal point, or '-'
+  const filterQuantity = (val) => {
+    if (val === '-') return '-';
+    const cleaned = val.replace(/[^0-9.-]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      return parts[0] + '.' + parts.slice(1).join('');
     }
-
-    updated[index] = current;
-    onChange('items', updated);
+    return cleaned;
   };
 
-  const toggleManualAmount = (index) => {
+  // Filter helper for rate/amount: allows digits, commas, optional decimal point, or '-'
+  const filterRateOrAmount = (val) => {
+    if (val === '-') return '-';
+    const cleaned = val.replace(/[^0-9.,-]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      return parts[0] + '.' + parts.slice(1).join('');
+    }
+    return cleaned;
+  };
+
+  const handleItemChange = (index, field, rawValue) => {
     const updated = [...items];
-    const current = { ...updated[index] };
-    current.isManualAmount = !current.isManualAmount;
-    if (!current.isManualAmount) {
-      const qty = parseFloat(current.colsDbs);
-      const rate = parseFloat(current.rate);
+    let value = rawValue;
+
+    if (field === 'colsDbs') {
+      value = filterQuantity(rawValue);
+    } else if (field === 'rate' || field === 'amount') {
+      value = filterRateOrAmount(rawValue);
+    }
+
+    const current = { ...updated[index], [field]: value };
+
+    // Dynamic auto-calculation: automatically updates amount when colsDbs or rate changes
+    if (field === 'colsDbs' || field === 'rate') {
+      const cleanQtyStr = (field === 'colsDbs' ? value : current.colsDbs || '').toString().replace(/,/g, '').trim();
+      const cleanRateStr = (field === 'rate' ? value : current.rate || '').toString().replace(/,/g, '').trim();
+
+      const qty = parseFloat(cleanQtyStr);
+      const rate = parseFloat(cleanRateStr);
+
       if (!isNaN(qty) && !isNaN(rate)) {
         current.amount = (Math.round(qty * rate * 100) / 100).toString();
       }
     }
+
     updated[index] = current;
     onChange('items', updated);
   };
@@ -110,10 +128,6 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
         <div className="p-4 space-y-4">
           <div className="space-y-3">
         {items.map((item, index) => {
-          const qty = parseFloat(item.colsDbs);
-          const rate = parseFloat(item.rate);
-          const isAuto = !item.isManualAmount && !isNaN(qty) && !isNaN(rate);
-
           return (
             <div
               key={item.id || index}
@@ -189,32 +203,17 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
                   />
                 </div>
 
-                {/* Amount (₹) - Generous width for 6-7 digit amounts */}
+                {/* Amount (₹) - Generous width for 6-7 digit amounts, always directly editable */}
                 <div className="col-span-3 sm:col-span-4">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                      Amount (₹)
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => toggleManualAmount(index)}
-                      title={item.isManualAmount ? 'Auto: Rate × Qty' : 'Set custom amount'}
-                      className="text-[10px] text-blue-600 hover:text-blue-800 font-semibold"
-                    >
-                      {item.isManualAmount ? '✏️ Custom' : '⚡ Auto'}
-                    </button>
-                  </div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                    Amount (₹)
+                  </label>
                   <input
                     type="text"
-                    value={item.amount}
-                    readOnly={isAuto}
+                    value={item.amount || ''}
                     onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
                     placeholder="0.00"
-                    className={`w-full px-2.5 py-1.5 border rounded-lg text-right text-xs font-mono font-extrabold outline-none ${
-                      isAuto
-                        ? 'bg-slate-100 border-slate-300 text-slate-900'
-                        : 'bg-amber-50 border-amber-300 text-amber-900 focus:ring-1 focus:ring-amber-500'
-                    }`}
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-right text-xs font-mono font-extrabold text-slate-900 focus:ring-1 focus:ring-blue-500 outline-none"
                   />
                 </div>
               </div>
