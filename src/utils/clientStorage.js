@@ -2,6 +2,12 @@ const STORAGE_KEY_CLIENTS = 'vedant_saved_clients';
 
 export const DEFAULT_CLIENT_PRESETS = [
   {
+    id: 'preset-marine-electricals',
+    name: 'Marine Electricals',
+    billTo: 'MARINE ELECTRICALS\nIndustrial Estate Verna\n403722 GOA',
+    isDefault: true,
+  },
+  {
     id: 'preset-apex-engineering',
     name: 'Apex Engineering Works',
     billTo: 'APEX ENGINEERING WORKS\nPlot No. 45, Phase II, Industrial Area\nGoa - 403722',
@@ -15,6 +21,16 @@ export function loadSavedClients() {
     if (saved !== null) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
+        const hasMarine = parsed.some(
+          (c) => c.id === 'preset-marine-electricals' || c.name === 'Marine Electricals'
+        );
+        const isSeeded = localStorage.getItem('vedant_marine_electricals_seeded');
+        if (!hasMarine && !isSeeded) {
+          localStorage.setItem('vedant_marine_electricals_seeded', 'true');
+          const updated = [DEFAULT_CLIENT_PRESETS[0], ...parsed];
+          localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(updated));
+          return updated;
+        }
         return parsed;
       }
     }
