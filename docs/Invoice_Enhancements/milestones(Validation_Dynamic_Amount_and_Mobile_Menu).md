@@ -75,12 +75,12 @@
   - Display non-intrusive format feedback (e.g. green check indicator when valid, subtle amber warning badge when invalid) without blocking fluid typing.
   - In `TaxSection.jsx`, validate SAC code format.
 - **Gate ✅:**
-  - [ ] Typing valid GSTIN `30TCEPS9342N1ZP` shows valid indicator and enforces 15-char max.
-  - [ ] Typing malformed GSTIN `30ABC` displays gentle format warning without blocking typing.
-  - [ ] Typing valid UDYAM `UDYAM-GA-02-0025499` validates successfully and enforces 24-char max.
-  - [ ] All input fields enforce character length limits (`maxLength`).
-  - [ ] LocalStorage save frequency is throttled/debounced to 300ms during rapid typing.
-  - [ ] Typing invalid SAC code displays helpful format hint.
+  - [x] Typing valid GSTIN `30TCEPS9342N1ZP` shows valid indicator and enforces 15-char max.
+  - [x] Typing malformed GSTIN `30ABC` displays gentle format warning without blocking typing.
+  - [x] Typing valid UDYAM `UDYAM-GA-02-0025499` validates successfully and enforces 24-char max.
+  - [x] All input fields enforce character length limits (`maxLength`).
+  - [x] LocalStorage save frequency is throttled/debounced to 300ms during rapid typing.
+  - [x] Typing invalid SAC code displays helpful format hint.
 
 ---
 
@@ -91,6 +91,7 @@
   | File | Action |
   |---|---|
   | `src/utils/imageHelper.js` | MODIFY (remove unused parameter warning) |
+  | `src/utils/storage.js` | MODIFY (remove unused SAMPLE_INVOICE import) |
 - **Key Implementation Details:**
   - Resolve existing oxlint warnings (`unused imports`, `reject` parameter in Promise).
   - Run full `npm run lint` and `npm run build`.
@@ -108,5 +109,5 @@
 |---|---|---|---|---|---|
 | 1 | Dynamic Amount Recalculation & Auto-Custom Removal | ✅ Done | Gemini 3.7 Flash (High) | 0 | 4 |
 | 2 | Mobile 3-Dots Menu for Phone Viewport | ✅ Done | Gemini 3.7 Flash (High) | 0 | 1 |
-| 3 | Field Regex Verification, Rate Limiting & Visual Feedback | ⏳ Next | Gemini 3.7 Flash (High) | 1 | 6 |
-| 4 | Integration Verification & Build Gate | — | Gemini 3.7 Flash (High) | 0 | 2 |
+| 3 | Field Regex Verification, Rate Limiting & Visual Feedback | ✅ Done | Gemini 3.7 Flash (High) | 1 | 6 |
+| 4 | Integration Verification & Build Gate | ⏳ Next | Gemini 3.7 Flash (High) | 0 | 2 |

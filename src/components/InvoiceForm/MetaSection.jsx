@@ -1,5 +1,6 @@
 import React from 'react';
-import { FileText, Calendar, Hash, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, Calendar, Hash, Plus, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { MAX_LENGTHS, isValidInvoiceNo } from '../../utils/validation';
 
 export default function MetaSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
   const incrementInvoiceNo = () => {
@@ -26,6 +27,8 @@ export default function MetaSection({ invoice, onChange, isCollapsed = false, on
   const metaSummary = `${invoice.invoiceNo || 'No Invoice #'}${
     invoice.invoiceDate ? ` • ${invoice.invoiceDate}` : ''
   }`;
+
+  const invNoVal = (invoice.invoiceNo || '').trim();
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -75,17 +78,25 @@ export default function MetaSection({ invoice, onChange, isCollapsed = false, on
                   <Hash className="w-3.5 h-3.5 text-slate-400" />
                   Invoice No.
                 </label>
-                <button
-                  type="button"
-                  onClick={incrementInvoiceNo}
-                  title="Increment last number (+1)"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition active:scale-95 shadow-2xs"
-                >
-                  <Plus className="w-3 h-3 stroke-[2.5]" /> 1
-                </button>
+                <div className="flex items-center gap-2">
+                  {invNoVal && isValidInvoiceNo(invNoVal) && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                      <Check className="w-3 h-3" /> Valid #
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={incrementInvoiceNo}
+                    title="Increment last number (+1)"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition active:scale-95 shadow-2xs"
+                  >
+                    <Plus className="w-3 h-3 stroke-[2.5]" /> 1
+                  </button>
+                </div>
               </div>
               <input
                 type="text"
+                maxLength={MAX_LENGTHS.invoiceNo}
                 value={invoice.invoiceNo || ''}
                 onChange={(e) => onChange('invoiceNo', e.target.value)}
                 placeholder="e.g. VE 26/27 A-5"
@@ -101,6 +112,7 @@ export default function MetaSection({ invoice, onChange, isCollapsed = false, on
               </label>
               <input
                 type="date"
+                maxLength={MAX_LENGTHS.invoiceDate}
                 value={invoice.invoiceDate || ''}
                 onChange={(e) => onChange('invoiceDate', e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"

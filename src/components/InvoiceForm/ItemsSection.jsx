@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Trash2, ListChecks, ChevronDown, ChevronUp } from 'lucide-react';
 import { COMMON_UOM, createEmptyItem } from '../../types/invoice';
+import { MAX_LENGTHS } from '../../utils/validation';
 
 export default function ItemsSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
   const items = invoice.items || [];
@@ -140,6 +141,7 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
                 </span>
                 <input
                   type="text"
+                  maxLength={MAX_LENGTHS.description}
                   value={item.description}
                   onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                   placeholder="Item description or code (e.g. 10030.40, RPP busbar)"
@@ -164,6 +166,7 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
                   </label>
                   <input
                     type="text"
+                    maxLength={MAX_LENGTHS.colsDbs}
                     value={item.colsDbs}
                     onChange={(e) => handleItemChange(index, 'colsDbs', e.target.value)}
                     placeholder="20"
@@ -178,6 +181,7 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
                   </label>
                   <input
                     list="uom-options"
+                    maxLength={MAX_LENGTHS.uom}
                     value={item.uom}
                     onChange={(e) => handleItemChange(index, 'uom', e.target.value.toUpperCase())}
                     className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-center text-xs font-bold uppercase focus:ring-1 focus:ring-blue-500 outline-none"
@@ -196,6 +200,7 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
                   </label>
                   <input
                     type="text"
+                    maxLength={MAX_LENGTHS.rate}
                     value={item.rate}
                     onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
                     placeholder="28,000"
@@ -210,6 +215,7 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
                   </label>
                   <input
                     type="text"
+                    maxLength={MAX_LENGTHS.amount}
                     value={item.amount || ''}
                     onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
                     placeholder="0.00"

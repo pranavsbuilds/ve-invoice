@@ -1,10 +1,12 @@
 import React from 'react';
-import { Calculator, Percent, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calculator, Percent, Tag, ChevronDown, ChevronUp, Check, AlertCircle } from 'lucide-react';
 import { calculateInvoiceTotals } from '../../utils/calculator';
 import { formatIndianCurrency } from '../../utils/numberToWords';
+import { MAX_LENGTHS, isValidSAC } from '../../utils/validation';
 
 export default function TaxSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
   const totals = calculateInvoiceTotals(invoice);
+  const sacValue = (invoice.sacCode || '').trim();
 
   const taxSummary = `${formatIndianCurrency(totals.grossTotal, true)} • ${
     invoice.taxMode === 'IGST'
@@ -57,14 +59,28 @@ export default function TaxSection({ invoice, onChange, isCollapsed = false, onT
         <div className="space-y-4">
           {/* SAC Code */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5 text-slate-400" />
-              SAC Code
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                <Tag className="w-3.5 h-3.5 text-slate-400" />
+                SAC Code
+              </label>
+              {sacValue && (
+                isValidSAC(sacValue) ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                    <Check className="w-3 h-3" /> Valid SAC
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                    <AlertCircle className="w-3 h-3 text-amber-600" /> 4-6 digits (e.g. 998719)
+                  </span>
+                )
+              )}
+            </div>
             <input
               type="text"
+              maxLength={MAX_LENGTHS.sacCode}
               value={invoice.sacCode || ''}
-              onChange={(e) => onChange('sacCode', e.target.value)}
+              onChange={(e) => onChange('sacCode', e.target.value.replace(/[^0-9]/g, ''))}
               placeholder="e.g. 998719"
               className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none"
             />
@@ -213,6 +229,7 @@ export default function TaxSection({ invoice, onChange, isCollapsed = false, onT
               <summary className="hover:text-blue-600">Edit words manually</summary>
               <input
                 type="text"
+                maxLength={MAX_LENGTHS.customAmountInWords}
                 value={invoice.customAmountInWords || ''}
                 onChange={(e) => onChange('customAmountInWords', e.target.value)}
                 placeholder="Leave blank for automatic conversion"

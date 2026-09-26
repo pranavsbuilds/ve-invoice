@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, MapPin, AtSign, Plus, Trash2, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
 import { loadSavedClients, saveClientPreset, deleteClientPreset } from '../../utils/clientStorage';
+import { MAX_LENGTHS } from '../../utils/validation';
 
 export default function ClientSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState(() => loadSavedClients());
   const [selectedClientId, setSelectedClientId] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -14,10 +15,6 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
   const dropdownRef = useRef(null);
 
   const quickPlaces = ['Verna', 'Sancoal', 'Zuarinagar', 'Panaji', 'Margao', 'Mapusa', 'Goa'];
-
-  useEffect(() => {
-    setClients(loadSavedClients());
-  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -221,11 +218,15 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Bill To */}
             <div className="md:col-span-3">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Bill To (Client Name, Address & GSTIN)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Bill To (Client Name, Address & GSTIN)
+                </label>
+                <span className="text-[10px] text-slate-400 font-mono">max {MAX_LENGTHS.billTo}</span>
+              </div>
               <textarea
                 rows="3"
+                maxLength={MAX_LENGTHS.billTo}
                 value={invoice.billTo || ''}
                 onChange={(e) => onChange('billTo', e.target.value)}
                 placeholder="e.g. APEX ENGINEERING WORKS&#10;Plot No. 45, Phase II, Industrial Area&#10;Goa - 403722"
@@ -241,6 +242,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
               </label>
               <input
                 type="text"
+                maxLength={MAX_LENGTHS.placeOfService}
                 value={invoice.placeOfService || ''}
                 onChange={(e) => onChange('placeOfService', e.target.value)}
                 placeholder="e.g. Verna, Goa"
@@ -269,6 +271,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
               </label>
               <input
                 type="text"
+                maxLength={MAX_LENGTHS.kindAttention}
                 value={invoice.kindAttention || ''}
                 onChange={(e) => onChange('kindAttention', e.target.value)}
                 placeholder="e.g. Kind Attention: Accounts Department / GSTIN: 30AAAAA0000A1Z5"
@@ -310,6 +313,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                 </label>
                 <input
                   type="text"
+                  maxLength={MAX_LENGTHS.companyName}
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
                   placeholder="e.g. Apex Engineering Works"
@@ -335,6 +339,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                 </div>
                 <textarea
                   rows="4"
+                  maxLength={MAX_LENGTHS.billTo}
                   value={newClientBillTo}
                   onChange={(e) => setNewClientBillTo(e.target.value)}
                   placeholder="e.g. APEX ENGINEERING WORKS&#10;Plot No. 45, Phase II, Industrial Area&#10;Goa - 403722"

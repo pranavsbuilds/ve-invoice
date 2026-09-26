@@ -19,7 +19,6 @@ import {
   saveInvoiceToHistory,
 } from './utils/storage';
 import { downloadInvoicePDF } from './utils/pdfGenerator';
-import { calculateInvoiceTotals } from './utils/calculator';
 import {
   ZoomIn,
   ZoomOut,
@@ -29,7 +28,6 @@ import {
   Download,
   Eye,
   Edit3,
-  Layers,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -76,9 +74,12 @@ export default function App() {
     });
   };
 
-  // Auto-save draft on every change
+  // Rate-limited auto-save draft (300ms debounce buffer to prevent storage thrashing)
   useEffect(() => {
-    saveCurrentInvoice(invoice);
+    const timer = setTimeout(() => {
+      saveCurrentInvoice(invoice);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [invoice]);
 
   // Responsive auto-fit scaling for mobile viewports
@@ -168,8 +169,6 @@ export default function App() {
       setIsDownloading(false);
     }
   };
-
-  const totals = calculateInvoiceTotals(invoice);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 font-sans selection:bg-blue-500 selection:text-white">
