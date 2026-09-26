@@ -72,7 +72,7 @@ export async function downloadInvoiceImage(elementId = 'invoice-pad-preview', in
 export async function copyInvoiceImageToClipboard(elementId = 'invoice-pad-preview') {
   const canvas = await captureInvoiceCanvas(elementId);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     canvas.toBlob(async (blob) => {
       if (!blob) return resolve(false);
       try {

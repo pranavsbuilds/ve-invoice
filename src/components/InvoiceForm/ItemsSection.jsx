@@ -1,32 +1,15 @@
 import React from 'react';
 import { Plus, Trash2, ListChecks, ChevronDown, ChevronUp } from 'lucide-react';
 import { COMMON_UOM, createEmptyItem } from '../../types/invoice';
-import { MAX_LENGTHS } from '../../utils/validation';
+import {
+  MAX_LENGTHS,
+  filterQuantity,
+  filterRate,
+  filterAmount,
+} from '../../utils/validation';
 
 export default function ItemsSection({ invoice, onChange, isCollapsed = false, onToggleCollapse }) {
   const items = invoice.items || [];
-
-  // Filter helper: allows digits, optional decimal point, or '-'
-  const filterQuantity = (val) => {
-    if (val === '-') return '-';
-    const cleaned = val.replace(/[^0-9.-]/g, '');
-    const parts = cleaned.split('.');
-    if (parts.length > 2) {
-      return parts[0] + '.' + parts.slice(1).join('');
-    }
-    return cleaned;
-  };
-
-  // Filter helper for rate/amount: allows digits, commas, optional decimal point, or '-'
-  const filterRateOrAmount = (val) => {
-    if (val === '-') return '-';
-    const cleaned = val.replace(/[^0-9.,-]/g, '');
-    const parts = cleaned.split('.');
-    if (parts.length > 2) {
-      return parts[0] + '.' + parts.slice(1).join('');
-    }
-    return cleaned;
-  };
 
   const handleItemChange = (index, field, rawValue) => {
     const updated = [...items];
@@ -34,8 +17,10 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
 
     if (field === 'colsDbs') {
       value = filterQuantity(rawValue);
-    } else if (field === 'rate' || field === 'amount') {
-      value = filterRateOrAmount(rawValue);
+    } else if (field === 'rate') {
+      value = filterRate(rawValue);
+    } else if (field === 'amount') {
+      value = filterAmount(rawValue);
     }
 
     const current = { ...updated[index], [field]: value };
@@ -49,7 +34,7 @@ export default function ItemsSection({ invoice, onChange, isCollapsed = false, o
       const rate = parseFloat(cleanRateStr);
 
       if (!isNaN(qty) && !isNaN(rate)) {
-        current.amount = (Math.round(qty * rate * 100) / 100).toString();
+        current.amount = filterAmount((Math.round(qty * rate * 100) / 100).toString());
       }
     }
 

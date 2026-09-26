@@ -97,9 +97,9 @@
   - Run full `npm run lint` and `npm run build`.
   - Verify complete workflow on mobile and desktop viewports.
 - **Gate ✅:**
-  - [ ] `npm run lint` passes with 0 errors.
-  - [ ] `npm run build` generates production bundle cleanly.
-  - [ ] PDF export and Image Share continue to work seamlessly with custom amounts, rate-limited inputs, and validated fields.
+  - [x] `npm run lint` passes with 0 errors.
+  - [x] `npm run build` generates production bundle cleanly.
+  - [x] PDF export and Image Share continue to work seamlessly with custom amounts, rate-limited inputs, and validated fields.
 
 ---
 
@@ -110,4 +110,5 @@
 | 1 | Dynamic Amount Recalculation & Auto-Custom Removal | ✅ Done | Gemini 3.7 Flash (High) | 0 | 4 |
 | 2 | Mobile 3-Dots Menu for Phone Viewport | ✅ Done | Gemini 3.7 Flash (High) | 0 | 1 |
 | 3 | Field Regex Verification, Rate Limiting & Visual Feedback | ✅ Done | Gemini 3.7 Flash (High) | 1 | 6 |
-| 4 | Integration Verification & Build Gate | ⏳ Next | Gemini 3.7 Flash (High) | 0 | 2 |
+| 4 | Integration Verification & Build Gate | ✅ Done | Gemini 3.7 Flash (High) | 0 | 5 |
+

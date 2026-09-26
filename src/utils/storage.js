@@ -1,4 +1,4 @@
-import { SAMPLE_INVOICE, createNewInvoice } from '../types/invoice';
+import { createNewInvoice } from '../types/invoice';
 
 const STORAGE_KEY_CURRENT = 'vedant_current_invoice';
 const STORAGE_KEY_HISTORY = 'vedant_invoice_history';

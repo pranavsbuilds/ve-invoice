@@ -17,13 +17,13 @@ export const MAX_LENGTHS = {
   companyGstin: 15,
   companyUdyam: 24,
   billTo: 300,
-  placeOfService: 50,
+  placeOfService: 12, // Exactly 12 characters max
   kindAttention: 100,
   description: 120,
-  colsDbs: 10,
+  colsDbs: 7, // 7 digits (no decimal point)
   uom: 8,
-  rate: 15,
-  amount: 18,
+  rate: 15, // max 7 digits before decimal point
+  amount: 18, // max 9 digits before decimal point
   sacCode: 8,
   taxRate: 5,
   customAmountInWords: 200,
@@ -62,4 +62,74 @@ export function isValidInvoiceNo(val) {
 export function cleanNumericString(val) {
   if (!val) return '';
   return val.toString().replace(/,/g, '').trim();
+}
+
+// Rate limiting: 7 digits (no decimal point) or '-'
+export function filterQuantity(val) {
+  if (!val && val !== 0) return '';
+  const str = val.toString();
+  if (str === '-') return '-';
+  return str.replace(/[^0-9]/g, '').slice(0, 7);
+}
+
+// Rate limiting: max 7 digits before decimal point, optional commas & up to 2 decimal places, or '-'
+export function filterRate(val) {
+  if (!val && val !== 0) return '';
+  const str = val.toString();
+  if (str === '-') return '-';
+  const cleaned = str.replace(/[^0-9.,]/g, '');
+  const parts = cleaned.split('.');
+  let intPart = parts[0];
+  const intDigits = intPart.replace(/,/g, '');
+  if (intDigits.length > 7) {
+    let count = 0;
+    let truncated = '';
+    for (const ch of intPart) {
+      if (ch >= '0' && ch <= '9') {
+        if (count < 7) {
+          truncated += ch;
+          count++;
+        }
+      } else {
+        truncated += ch;
+      }
+    }
+    intPart = truncated;
+  }
+  if (parts.length > 1) {
+    const decPart = parts.slice(1).join('').replace(/[^0-9]/g, '').slice(0, 2);
+    return `${intPart}.${decPart}`;
+  }
+  return intPart;
+}
+
+// Rate limiting: max 9 digits before decimal point, optional commas & up to 2 decimal places, or '-'
+export function filterAmount(val) {
+  if (!val && val !== 0) return '';
+  const str = val.toString();
+  if (str === '-') return '-';
+  const cleaned = str.replace(/[^0-9.,]/g, '');
+  const parts = cleaned.split('.');
+  let intPart = parts[0];
+  const intDigits = intPart.replace(/,/g, '');
+  if (intDigits.length > 9) {
+    let count = 0;
+    let truncated = '';
+    for (const ch of intPart) {
+      if (ch >= '0' && ch <= '9') {
+        if (count < 9) {
+          truncated += ch;
+          count++;
+        }
+      } else {
+        truncated += ch;
+      }
+    }
+    intPart = truncated;
+  }
+  if (parts.length > 1) {
+    const decPart = parts.slice(1).join('').replace(/[^0-9]/g, '').slice(0, 2);
+    return `${intPart}.${decPart}`;
+  }
+  return intPart;
 }

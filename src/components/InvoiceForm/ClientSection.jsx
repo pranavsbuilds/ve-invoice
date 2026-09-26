@@ -244,7 +244,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                 type="text"
                 maxLength={MAX_LENGTHS.placeOfService}
                 value={invoice.placeOfService || ''}
-                onChange={(e) => onChange('placeOfService', e.target.value)}
+                onChange={(e) => onChange('placeOfService', e.target.value.slice(0, MAX_LENGTHS.placeOfService))}
                 placeholder="e.g. Verna, Goa"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
