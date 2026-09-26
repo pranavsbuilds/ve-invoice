@@ -46,32 +46,40 @@
   - Ensure menu items meet mobile touch guidelines (minimum 44px tap target height, high contrast).
   - Tapping any option triggers its handler and closes the menu automatically.
 - **Gate ✅:**
-  - [ ] On viewports < 768px, the 6 desktop buttons collapse into a single 3-dots button.
-  - [ ] Tapping 3-dots opens a sleek dropdown with all 6 actions visible.
-  - [ ] Tapping any option executes the corresponding action and closes the menu.
-  - [ ] Clicking outside the dropdown or pressing Escape closes the menu.
-  - [ ] On viewports >= 768px, the full horizontal action bar remains visible as before.
+  - [x] On viewports < 768px, the 6 desktop buttons collapse into a single 3-dots button.
+  - [x] Tapping 3-dots opens a sleek dropdown with all 6 actions visible.
+  - [x] Tapping any option executes the corresponding action and closes the menu.
+  - [x] Clicking outside the dropdown or pressing Escape closes the menu.
+  - [x] On viewports >= 768px, the full horizontal action bar remains visible as before.
 
 ---
 
-## Milestone 3: Field Regex Verification & Visual Feedback
-- **Recommended Model:** `Gemini 3.5 Flash (Medium)` or `Gemini 3.7 Flash (High)`
-  - *Rationale:* Pure utility regex functions, string normalization, and lightweight input border/badge styling.
+## Milestone 3: Field Regex Verification, Input Rate Limiting & Visual Feedback
+- **Recommended Model:** `Gemini 3.7 Flash (High)`
+  - *Rationale:* Comprehensive regex validation, entry constraints (`maxLength`) across all form components, and debounced rate-limited storage persistence in `App.jsx`.
 - **Files Table:**
   | File | Action |
   |---|---|
   | `src/utils/validation.js` | CREATE |
   | `src/components/InvoiceForm/CompanySection.jsx` | MODIFY |
+  | `src/components/InvoiceForm/ClientSection.jsx` | MODIFY |
+  | `src/components/InvoiceForm/MetaSection.jsx` | MODIFY |
+  | `src/components/InvoiceForm/ItemsSection.jsx` | MODIFY |
   | `src/components/InvoiceForm/TaxSection.jsx` | MODIFY |
+  | `src/App.jsx` | MODIFY |
 - **Key Implementation Details:**
   - Create `src/utils/validation.js` with regex validators for GSTIN (`^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$`), UDYAM (`^UDYAM-[A-Z]{2}-\d{2}-\d{7}$`), SAC (`^99\d{2,4}$`), Phone, Email, and Numbers.
+  - Enforce strict `maxLength` entry constraints on every input field in the application (Invoice No: 30, GSTIN: 15, UDYAM: 24, Phone: 35, Email: 60, Address: 200, Bill To: 300, Qty: 10, Rate: 15, Amount: 18, SAC: 8, Rates: 5).
+  - Add 300ms debounced rate limiting to `saveCurrentInvoice` in `App.jsx` to prevent high-frequency storage writes on rapid keystrokes.
   - In `CompanySection.jsx`, auto-uppercase GSTIN and UDYAM on input.
-  - Display non-intrusive format feedback (e.g. green check indicator when valid, subtle amber warning badge when invalid).
+  - Display non-intrusive format feedback (e.g. green check indicator when valid, subtle amber warning badge when invalid) without blocking fluid typing.
   - In `TaxSection.jsx`, validate SAC code format.
 - **Gate ✅:**
-  - [ ] Typing valid GSTIN `30TCEPS9342N1ZP` shows valid indicator.
+  - [ ] Typing valid GSTIN `30TCEPS9342N1ZP` shows valid indicator and enforces 15-char max.
   - [ ] Typing malformed GSTIN `30ABC` displays gentle format warning without blocking typing.
-  - [ ] Typing valid UDYAM `UDYAM-GA-02-0025499` validates successfully.
+  - [ ] Typing valid UDYAM `UDYAM-GA-02-0025499` validates successfully and enforces 24-char max.
+  - [ ] All input fields enforce character length limits (`maxLength`).
+  - [ ] LocalStorage save frequency is throttled/debounced to 300ms during rapid typing.
   - [ ] Typing invalid SAC code displays helpful format hint.
 
 ---
@@ -82,7 +90,6 @@
 - **Files Table:**
   | File | Action |
   |---|---|
-  | `src/App.jsx` | MODIFY (cleanup unused imports) |
   | `src/utils/imageHelper.js` | MODIFY (remove unused parameter warning) |
 - **Key Implementation Details:**
   - Resolve existing oxlint warnings (`unused imports`, `reject` parameter in Promise).
@@ -91,7 +98,7 @@
 - **Gate ✅:**
   - [ ] `npm run lint` passes with 0 errors.
   - [ ] `npm run build` generates production bundle cleanly.
-  - [ ] PDF export and Image Share continue to work seamlessly with custom amounts and validated fields.
+  - [ ] PDF export and Image Share continue to work seamlessly with custom amounts, rate-limited inputs, and validated fields.
 
 ---
 
@@ -100,6 +107,6 @@
 | # | Milestone | Status | Model | New Files | Modified Files |
 |---|---|---|---|---|---|
 | 1 | Dynamic Amount Recalculation & Auto-Custom Removal | ✅ Done | Gemini 3.7 Flash (High) | 0 | 4 |
-| 2 | Mobile 3-Dots Menu for Phone Viewport | ⏳ Next | Gemini 3.7 Flash (High) | 0 | 1 |
-| 3 | Field Regex Verification & Visual Feedback | — | Gemini 3.5 Flash (Medium) | 1 | 2 |
+| 2 | Mobile 3-Dots Menu for Phone Viewport | ✅ Done | Gemini 3.7 Flash (High) | 0 | 1 |
+| 3 | Field Regex Verification, Rate Limiting & Visual Feedback | ⏳ Next | Gemini 3.7 Flash (High) | 1 | 6 |
 | 4 | Integration Verification & Build Gate | — | Gemini 3.7 Flash (High) | 0 | 2 |

@@ -82,7 +82,34 @@ A dedicated utility module `src/utils/validation.js` will encapsulate regex defi
 | **8** | **Quantity (Cols/DBs)** | `item.colsDbs` | Digits (integer or decimal) or `-` only | `^(?:\d+(?:\.\d+)?\|-)$` | `20`, `2.5`, `-` | `abc`, `?` |
 | **9** | **Rate (₹)** | `item.rate` | Digits (with optional commas/decimals) or `-` only | `^(?:(?:\d{1,3}(?:,\d{3})*\|\d+)(?:\.\d{1,2})?\|-)$` | `28,000`, `7500`, `-` | `abc`, `rate` |
 | **10** | **Amount (₹)** | `item.amount` | Digits (with optional commas/decimals) or `-` only | `^(?:(?:\d{1,3}(?:,\d{3})*\|\d+)(?:\.\d{1,2})?\|-)$` | `560000`, `1,50,000.00`, `-` | `text`, `Free` |
-| **11** | **Tax Rates (%)** | `cgstRate`, `sgstRate`, `igstRate` | Numerical rate from 0% to 100% | `^(?:100(?:\.0{1,2})?|[0-9]{1,2}(?:\.[0-9]{1,2})?)$` | `9`, `18`, `2.5` | `105`, `-1` |
+### Rate Limiting & Character Length Constraints Plan (Milestone 3)
+To prevent buffer overflows, UI layout breaks, print canvas distortion, and high-frequency storage thrashing, strict entry constraints and rate limiting will be enforced across every entry field:
+
+| Section | Field | Max Length (`maxLength`) | Entry Filter / Allowed Characters | Purpose |
+|---|---|---|---|---|
+| **Invoice Details** | `invoiceNo` | `30` | Alphanumeric, spaces, `/`, `-`, `.` | Standard invoice identifier bounds |
+| **Invoice Details** | `invoiceDate` | `10` | `YYYY-MM-DD` date | Strict standard date string length |
+| **Company Info** | `name` | `80` | Alphanumeric, spaces, `&`, `,`, `-`, `.` | Prevents title overflow on pad header |
+| **Company Info** | `phone` | `35` | Digits, `+`, `/`, `,`, spaces, `-` | Prevents phone field inflation |
+| **Company Info** | `email` | `60` | Email RFC characters | Prevents email string overflow |
+| **Company Info** | `address` | `200` | Multiline / text | Prevents address distortion on invoice header |
+| **Company Info** | `gstin` | `15` | Exactly 15 statutory characters | Enforces Indian GST format limit |
+| **Company Info** | `udyam` | `24` | Up to 24 statutory characters | Enforces UDYAM format limit |
+| **Client Info** | `billTo` | `300` | Multiline client details | Protects pad client box height |
+| **Client Info** | `placeOfService` | `50` | Alphanumeric, commas, spaces | Prevents location overflow |
+| **Client Info** | `kindAttention` | `100` | Alphanumeric, spaces, punctuation | Protects Kind Attention line height |
+| **Line Items** | `description` | `120` | Printable text | Ensures pad line height consistency |
+| **Line Items** | `colsDbs` (Qty) | `10` | Digits, decimal, or `-` | Prevents quantity column clipping |
+| **Line Items** | `uom` | `8` | Uppercase letters | Compact UOM bounds (`NOS`, etc.) |
+| **Line Items** | `rate` | `15` | Digits, commas, decimal, or `-` | Full visibility for 5-7 digit rates |
+| **Line Items** | `amount` | `18` | Digits, commas, decimal, or `-` | Full visibility for 6-8 digit amounts |
+| **Taxes & SAC** | `sacCode` | `8` | Digits only (`4-6` standard) | Restricts SAC to statutory digit bounds |
+| **Taxes & SAC** | `cgstRate`, `sgstRate`, `igstRate` | `5` | Numbers up to 100% | Prevents invalid tax rate strings |
+| **Taxes & SAC** | `customAmountInWords` | `200` | Text | Bounds manual words override |
+
+#### Storage & Processing Rate Limiting:
+- **Debounced LocalStorage Synchronization**: Replace keystroke-level synchronous `localStorage` updates with a 300ms debounce buffer in `App.jsx`, rate-limiting I/O writes during rapid fluid typing.
+- **Throttled Regex Validation**: Format validations run non-blocking on change with memoized regex instances.
 
 ---
 
