@@ -18,14 +18,13 @@ import {
   saveCurrentInvoice,
   saveInvoiceToHistory,
 } from './utils/storage';
-import { downloadInvoicePDF } from './utils/pdfGenerator';
+import { downloadInvoicePDF, shareInvoicePDF } from './utils/pdfGenerator';
 import {
   ZoomIn,
   ZoomOut,
   Maximize2,
   CheckCircle2,
   Share2,
-  Download,
   Eye,
   Edit3,
   ChevronDown,
@@ -38,6 +37,7 @@ export default function App() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharingPdf, setIsSharingPdf] = useState(false);
   const [toast, setToast] = useState('');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [fitMode, setFitMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'fit' : 'manual'));
@@ -170,6 +170,29 @@ export default function App() {
     }
   };
 
+  const handleSharePDF = async () => {
+    setIsSharingPdf(true);
+    try {
+      // Auto-save invoice to history on share
+      saveInvoiceToHistory(invoice);
+      const res = await shareInvoicePDF('invoice-pad-preview', invoice.invoiceNo);
+      if (res.success) {
+        if (res.method === 'download_fallback') {
+          showToast(`Native share not supported — PDF downloaded & saved!`);
+        } else {
+          showToast(`Share sheet opened & invoice saved to history!`);
+        }
+      } else if (!res.cancelled) {
+        showToast('Could not open share menu. PDF downloaded.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to share PDF. Please try again or download as Image.');
+    } finally {
+      setIsSharingPdf(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 font-sans selection:bg-blue-500 selection:text-white">
       {/* Toast Alert */}
@@ -188,7 +211,9 @@ export default function App() {
         onOpenHistory={() => setShowHistoryModal(true)}
         onOpenShare={() => setShowShareModal(true)}
         onDownloadPdf={handleDownloadPDF}
+        onSharePdf={handleSharePDF}
         isDownloading={isDownloading}
+        isSharingPdf={isSharingPdf}
         activeMobileTab={activeMobileTab}
         setActiveMobileTab={setActiveMobileTab}
       />
@@ -429,11 +454,13 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloading}
-                  className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                  onClick={handleSharePDF}
+                  disabled={isSharingPdf || isDownloading}
+                  className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95"
+                  title="Share invoice PDF"
                 >
-                  <Download className="w-3.5 h-3.5" /> PDF
+                  <Share2 className={`w-3.5 h-3.5 ${isSharingPdf ? 'animate-spin' : ''}`} />
+                  <span>{isSharingPdf ? 'Sharing...' : 'Share PDF'}</span>
                 </button>
               </div>
             </div>
@@ -450,6 +477,8 @@ export default function App() {
         onClose={() => setShowShareModal(false)}
         invoice={invoice}
         onDownloadPdf={handleDownloadPDF}
+        onSharePdf={handleSharePDF}
+        isSharingPdf={isSharingPdf}
       />
 
       <HistoryModal

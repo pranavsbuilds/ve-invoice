@@ -19,7 +19,9 @@ export default function Header({
   onOpenHistory,
   onOpenShare,
   onDownloadPdf,
+  onSharePdf,
   isDownloading,
+  isSharingPdf = false,
   activeMobileTab,
   setActiveMobileTab,
 }) {
@@ -228,6 +230,21 @@ export default function Header({
                         <span>Share Image</span>
                       </button>
 
+                      {onSharePdf && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            onSharePdf();
+                          }}
+                          disabled={isSharingPdf}
+                          className="w-full px-3 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.98] min-h-[44px]"
+                        >
+                          <Share2 className={`w-4 h-4 ${isSharingPdf ? 'animate-spin' : ''}`} />
+                          <span>{isSharingPdf ? 'Sharing PDF...' : 'Share PDF'}</span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => {
@@ -237,8 +254,8 @@ export default function Header({
                         disabled={isDownloading}
                         className={`w-full px-3 py-2.5 rounded-lg text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.98] min-h-[44px] ${
                           isDownloading
-                            ? 'bg-blue-400 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700'
+                            ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
                         }`}
                       >
                         <Download className={`w-4 h-4 ${isDownloading ? 'animate-bounce' : ''}`} />
@@ -307,6 +324,21 @@ export default function Header({
             <Share2 className="w-3.5 h-3.5" />
             <span>Share Image</span>
           </button>
+
+          {onSharePdf && (
+            <button
+              type="button"
+              onClick={onSharePdf}
+              disabled={isSharingPdf}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm transition ${
+                isSharingPdf ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
+              title="Share invoice PDF via device"
+            >
+              <Share2 className={`w-3.5 h-3.5 ${isSharingPdf ? 'animate-spin' : ''}`} />
+              <span>{isSharingPdf ? 'Sharing PDF...' : 'Share PDF'}</span>
+            </button>
+          )}
 
           <button
             type="button"

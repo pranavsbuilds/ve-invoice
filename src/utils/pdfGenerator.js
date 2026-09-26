@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-export async function downloadInvoicePDF(elementId, invoiceNo = 'Invoice') {
+export async function generateInvoicePDFDocument(elementId = 'invoice-pad-preview', invoiceNo = 'Invoice') {
   const element = document.getElementById(elementId);
   if (!element) {
     throw new Error('Invoice preview element not found');
@@ -65,8 +65,7 @@ export async function downloadInvoicePDF(elementId, invoiceNo = 'Invoice') {
     pdf.addImage(imgData, 'PNG', xPos, yPos, renderedWidth, renderedHeight, '', 'FAST');
 
     const cleanInvoiceNo = (invoiceNo || 'Invoice').replace(/[^a-zA-Z0-9_-]/g, '_');
-    pdf.save(`Invoice_${cleanInvoiceNo}.pdf`);
-    return true;
+    return { pdf, cleanInvoiceNo };
   } finally {
     element.style.transform = originalTransform;
     if (wrapper) {
@@ -77,6 +76,40 @@ export async function downloadInvoicePDF(elementId, invoiceNo = 'Invoice') {
       if (originalInnerStyle) innerScaled.setAttribute('style', originalInnerStyle);
       else innerScaled.removeAttribute('style');
     }
+  }
+}
+
+export async function downloadInvoicePDF(elementId = 'invoice-pad-preview', invoiceNo = 'Invoice') {
+  const { pdf, cleanInvoiceNo } = await generateInvoicePDFDocument(elementId, invoiceNo);
+  pdf.save(`Invoice_${cleanInvoiceNo}.pdf`);
+  return true;
+}
+
+export async function shareInvoicePDF(elementId = 'invoice-pad-preview', invoiceNo = 'Invoice') {
+  const { pdf, cleanInvoiceNo } = await generateInvoicePDFDocument(elementId, invoiceNo);
+  const pdfBlob = pdf.output('blob');
+  const filename = `Invoice_${cleanInvoiceNo}.pdf`;
+  const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: `Invoice ${invoiceNo} - Vedant Enterprises`,
+        text: `Tax Invoice ${invoiceNo} from Vedant Enterprises`,
+      });
+      return { success: true, method: 'native' };
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        return { success: false, cancelled: true };
+      }
+      console.error('Share PDF failed', err);
+      return { success: false, error: err };
+    }
+  } else {
+    // Fallback: download PDF
+    pdf.save(filename);
+    return { success: true, method: 'download_fallback' };
   }
 }
 

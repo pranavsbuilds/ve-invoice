@@ -17,7 +17,14 @@ import {
 } from '../utils/imageHelper';
 import { saveInvoiceToHistory } from '../utils/storage';
 
-export default function ShareModal({ isOpen, onClose, invoice, onDownloadPdf }) {
+export default function ShareModal({
+  isOpen,
+  onClose,
+  invoice,
+  onDownloadPdf,
+  onSharePdf,
+  isSharingPdf = false,
+}) {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [sharing, setSharing] = useState(false);
@@ -175,20 +182,37 @@ export default function ShareModal({ isOpen, onClose, invoice, onDownloadPdf }) 
             </button>
           </div>
 
-          {/* Download Official PDF Button */}
-          {onDownloadPdf && (
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                onDownloadPdf();
-              }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-800 font-bold text-xs shadow-sm transition"
-            >
-              <FileText className="w-4 h-4 text-blue-600" />
-              Download Official A4 PDF Document
-            </button>
-          )}
+          {/* PDF Sharing & Downloading Options */}
+          <div className="space-y-2 pt-1 border-t border-slate-100">
+            {onSharePdf && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onSharePdf();
+                }}
+                disabled={isSharingPdf}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition active:scale-[0.98]"
+              >
+                <Share2 className="w-4 h-4" />
+                {isSharingPdf ? 'Preparing PDF...' : 'Share Official A4 PDF Document'}
+              </button>
+            )}
+
+            {onDownloadPdf && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onDownloadPdf();
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs shadow-sm transition active:scale-[0.98]"
+              >
+                <FileText className="w-4 h-4 text-slate-600" />
+                Download Official A4 PDF Document
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
