@@ -96,8 +96,8 @@ To prevent buffer overflows, UI layout breaks, print canvas distortion, and high
 | **Company Info** | `gstin` | `15` | Exactly 15 statutory characters | Enforces Indian GST format limit |
 | **Company Info** | `udyam` | `24` | Up to 24 statutory characters | Enforces UDYAM format limit |
 | **Client Info** | `billTo` | `300` | Multiline client details | Protects pad client box height |
-| **Client Info** | `placeOfService` | `50` | Alphanumeric, commas, spaces | Prevents location overflow |
-| **Client Info** | `kindAttention` | `100` | Alphanumeric, spaces, punctuation | Protects Kind Attention line height |
+| **Client Info** | `placeOfService` | `12` | Alphanumeric, commas, spaces | Enforces 12-character limit |
+| **Client Info** | `kindAttention` | `90` | Alphanumeric, spaces, punctuation | Protects Kind Attention line height (90 chars max) |
 | **Line Items** | `description` | `120` | Printable text | Ensures pad line height consistency |
 | **Line Items** | `colsDbs` (Qty) | `10` | Digits, decimal, or `-` | Prevents quantity column clipping |
 | **Line Items** | `uom` | `8` | Uppercase letters | Compact UOM bounds (`NOS`, etc.) |

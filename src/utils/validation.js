@@ -18,7 +18,7 @@ export const MAX_LENGTHS = {
   companyUdyam: 24,
   billTo: 300,
   placeOfService: 12, // Exactly 12 characters max
-  kindAttention: 100,
+  kindAttention: 90, // Exactly 90 characters max
   description: 120,
   colsDbs: 7, // 7 digits (no decimal point)
   uom: 8,

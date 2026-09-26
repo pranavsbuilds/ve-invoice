@@ -273,7 +273,7 @@ export default function ClientSection({ invoice, onChange, isCollapsed = false, 
                 type="text"
                 maxLength={MAX_LENGTHS.kindAttention}
                 value={invoice.kindAttention || ''}
-                onChange={(e) => onChange('kindAttention', e.target.value)}
+                onChange={(e) => onChange('kindAttention', e.target.value.slice(0, MAX_LENGTHS.kindAttention))}
                 placeholder="e.g. Kind Attention: Accounts Department / GSTIN: 30AAAAA0000A1Z5"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
